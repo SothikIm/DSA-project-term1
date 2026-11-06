@@ -1,0 +1,6 @@
+*.exe
+.vscode
+*.o
+obj
+bin
+SmartCampus.cbp
