@@ -4,3 +4,5 @@
 obj
 bin
 SmartCampus.cbp
+.env
+SmartCampus.depend
