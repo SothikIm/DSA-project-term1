@@ -1,0 +1,326 @@
+#pragma once
+
+#include<iostream>
+using namespace std;
+
+template <typename T>
+class LinkList{
+private:
+    struct Node{
+        T data;
+        Node* next;
+        Node(const T& d): data(d), next(nullptr){}
+    };
+
+    int size;
+    Node* head;
+    Node* tail;
+public:
+    LinkList(const T& d): size(0), head(new Node(d)), tail(head) {}
+
+    LinkList(): size(0), head(nullptr), tail(nullptr){}
+
+
+    LinkList(const T* arr, const int size): size(size){
+        if(size == 0 || !arr){
+            head = nullptr;
+            tail = nullptr;
+            return;
+        }
+
+        head = new Node(arr[0]);
+        tail = head;
+        for(int i = 1; i < size; i++){
+            Node* t = new Node(arr[i]);
+            tail->next = t;
+            tail = t;
+        }
+    }
+
+    LinkList(LinkList&& other) : size(other.size), head(other.head), tail(other.tail) {
+        other.head = nullptr;
+        other.tail = nullptr;
+        other.size = 0;
+    }
+
+    LinkList& operator=(const LinkList& other){
+        if(this != &other){
+            clear();
+            Node* cur = other.head;
+            while (cur)
+            {
+                pushBack(cur->data);
+                cur = cur->next;
+            }
+        }
+        return *this;
+    }
+
+    LinkList& operator=(LinkList&& other){
+        if(this != &other){
+            clear();
+            head = other.head;
+            tail = other.tail;
+            size = other.size;
+
+            other.head = nullptr;
+            other.tail = nullptr;
+            other.size = 0;
+        }
+        return *this;
+    }
+
+    int getSize(){
+        return size;
+    }
+
+    void display(){
+        if(isEmpty()){
+            cout << "The tasks is empty" << endl;
+            return;
+        }
+        cout << "[";
+        for(Node* p = head; p != nullptr; p = p->next){
+            if(p != head){
+                cout << ", " << endl;
+            }
+            cout << p->data;
+        }
+        cout << "]" << endl;
+    }
+
+    void pushBack(const T& val){
+        Node* t = new Node(val);
+        if(!head){
+            head = t;
+            tail = head;
+        }
+        else{
+            tail->next = t;
+            tail = t;
+        }
+        size++;
+    }
+
+    void pushFront(const T& val){
+        Node* t = new Node(val);
+        t->next = head;
+        head = t;
+        if (!tail)
+            tail = t;
+        size++;
+    }
+
+    void insert(const T& val, const int& index){
+            try{
+                if(index > size || index < 0)
+                    throw invalid_argument("IndexError");
+                else if(index == 0){
+                    pushFront(val);
+                    return;
+                }
+                else if(index == size){
+                    pushBack(val);
+                    return;
+                }
+                Node* p = head;
+                for(int pos = 0; pos < index - 1; pos++){
+                    p = p->next;
+                }
+                Node* t = new Node(val);
+                t->next = p->next;
+                p->next = t;
+                size++;
+
+            }
+            catch (invalid_argument& e){
+                cerr << e.what() << endl;
+            }
+        }
+
+        bool find(const T& key) {
+            for (Node* i = head; i != nullptr; i = i->next) {
+                if (i->data == key)
+                    return true;
+            }
+
+            return false;
+        }
+
+        bool isEmpty(){
+            return !head;
+        }
+
+        void sort(){
+            // bubble sort
+            if(!head || !head->next)
+                return;
+            bool swapped;
+
+            do
+            {
+                swapped = false;
+                Node* cur = head;
+                Node* prev = nullptr;
+                while (cur->next)
+                {
+                    Node* next = cur->next;
+                    if(cur->data > next->data){
+                        cur->next = next->next;
+                        next->next = cur;
+                        if(prev == nullptr)
+                            head = next;
+                        else
+                            prev->next = next;
+                        prev = next;
+                        swapped = true;
+                    }
+                    else{
+                        prev = cur;
+                        cur = cur->next;
+                    }
+                }
+
+            } while (swapped);
+
+        }
+
+        void pop(const T& key){
+            if(!head){
+                cout << "The list is empty" << endl;
+                return;
+            }
+            else if(key == head->data){
+                Node* p = head->next;
+                delete head;
+                head = p;
+                if(!head)
+                    tail = nullptr;
+                cout << "Delete successfully" << endl;
+                size--;
+            }
+            else{
+                bool found = false;
+                Node* cur = head->next;
+                Node* prev = head;
+                while(cur != nullptr){
+                    if(key == cur->data){
+                        if(cur == tail)
+                            tail = prev;
+                        prev->next = cur->next;
+                        delete cur;
+                        cout << "Delete successfully" << endl;
+                        found = true;
+                        size--;
+                        break;
+                    }else{
+                        prev = cur;
+                        cur = cur->next;
+                    }
+                }
+                if(!found)
+                    cout << "Element not found" << endl;
+            }
+        }
+
+        void pop_at(const int& index){
+            if(index >= size || index < 0)
+                return;
+            Node* cur = head;
+            Node* prev = nullptr;
+            for(int i = 0; i < index; i++){
+                prev = cur;
+                cur = cur->next;
+            }
+
+            if(prev){
+                prev->next = cur->next;
+            }
+            else{
+                head = cur->next;
+            }
+
+            if(cur == tail)
+                tail = prev;
+            delete cur;
+            size--;
+        }
+
+        T& at(const int& index) {
+            if (index >= size || index < 0){
+                throw out_of_range("Index out of range");
+            }
+            Node* cur = head;
+            for (size_t i = 0; i < index; i++){
+                cur = cur->next;
+            }
+            return cur->data;
+        }
+
+        void clear(){
+            Node* cur = head;
+            while(cur){
+                Node* next = cur->next;
+                delete cur;
+                cur = next;
+            }
+            head = nullptr;
+            tail = head;
+            size = 0;
+        }
+
+
+
+        class Iterator{
+        private:
+            Node* current;
+        public:
+            Iterator(){}
+            Iterator(Node* node): current(node){}
+
+            T& operator*(){
+                return current->data;
+            }
+
+            Iterator& operator++(){
+                current = current->next;
+                return *this;
+            }
+
+            T* operator->(){
+                return &(current->data);
+            }
+
+            bool operator!=(const Iterator& other){
+                return current != other.current;
+            }
+
+            void operator=(Node* p){
+                current = p;
+            }
+        };
+
+        Iterator begin(){
+            return Iterator(head);
+        }
+
+        Iterator end(){
+            return nullptr;
+        }
+
+        ~LinkList(){
+            clear();
+        }
+
+        void update(const T& old_data, const T& new_data){
+            Node* cur = head;
+            while(cur != nullptr){
+                if(cur->data == old_data){
+                    cur->data = new_data;
+                    return;
+                }
+                cur = cur->next;
+            }
+            cout << "The old data does not exist" << endl;
+        }
+};

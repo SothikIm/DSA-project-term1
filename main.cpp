@@ -1,60 +1,111 @@
 #include <iostream>
-#include <mariadb/mysql.h>   // or <mysql.h> if that's how you set it up
+#include <windows.h>
+#include <mariadb/mysql.h>
 #include <cstdlib>
+#include <conio.h>
 #include<map>
+#include<vector>
+#include<string>
 #include "load_env.hpp"
+#include "linked_list.hpp"
+#include "struct.hpp"
+#include "database.hpp"
+#include "booking.hpp"
 using namespace std;
+
+template <typename T>
+T inputVariable(const string messages);
+void pressEnterToContinue();
+
+void displayMenu(){
+    cout << "1. Booking room.\n";
+    cout << "2. Cancel reservation.\n";
+    cout << "3. Check in.\n";
+    cout << "4. Check out.\n";
+    cout << "5. Search Room.\n";
+    cout << "6. List top active rooms.\n";
+    cout << "7. Exit.\n";
+}
+
+void clearScreen(){
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
+}
+
 int main() {
-    MYSQL *con;
-    MYSQL_RES *res;
-    MYSQL_ROW row;
+    // load env
     auto env = load_env();
-    const char *host = env["HOST"].c_str();
-    const char *user = env["USER"].c_str();
-    const char *pass = env["PASSWORD"].c_str();
-    const char *db = env["DB"].c_str();
-    int port = stoi(env["PORT"]);
-
-    // connect to mysql connection
-    con = mysql_init(nullptr);
-    if(con == nullptr){
-        cerr << "mysql_init() fail\n";
-        return 1;
-    }
-
-    // connect to database
-    if(mysql_real_connect(con, host, user, pass, db, port, nullptr, 0) == nullptr){
-        cerr << "connection error : " << mysql_error(con) << endl;
-        mysql_close(con);
-        return 1;
-    }
-
-    cout << "Connect successful\n\n";
-
-    // run query
-    char* query = "SELECT * FROM student;";
-
-    if(mysql_query(con, query)){
-        cerr << "Query Error: " << mysql_error(con) << "\n";
-        mysql_close(con);
-        return 1;
-    }
-
-    res = mysql_store_result(con);
-    if(res != nullptr){
-        cout << "Query : \n";
-        cout << "------------------------------------\n";
-        while((row = mysql_fetch_row(res)) != nullptr){
-            cout << (row[0] ? row[0] : "NULL") << "\t"
-                << (row[1] ? row[1] : "NULL") << "\t"
-                << (row[2] ? row[2] : "NULL") << "\t"
-                << (row[3] ? row[3] : "NULL") << "\n"
-                << (row[4] ? row[4] : "NULL") << "\n";
+    // connect to MySQL Database
+    Database db(env["HOST"].c_str(),
+                env["USER"].c_str(),
+                env["PASSWORD"].c_str(),
+                env["DB"].c_str(),
+                stoi(env["PORT"]));
+    int choice;
+    do{
+        displayMenu();
+        choice = inputVariable<int>("Enter your choice: ");
+        switch(choice){
+        case 1:{
+            Booking b(db);
+            b.display();
+            pressEnterToContinue();
+            clearScreen();
+            break;
         }
-        mysql_free_result(res);
-    }
-    mysql_close(con);
-    return 0;
+        default:
+            cout << "Invalid input.\n";
+            break;
+        }
+    }while(choice != 7);
+
 
     return 0;
+}
+
+template <typename T>
+T inputVariable(const string messages){
+    T var;
+    while(true)
+    {
+        try{
+            cout << messages;
+            // constexpr means “this can be evaluated at compile time.
+            if constexpr (is_same_v<T, string>){
+                // ws mean remove whitespace in input buffer
+                getline(cin >> ws, var);
+                while (!var.empty() && var.back() == ' ')
+                {
+                    var.pop_back();
+                }
+            }
+            else{
+                if(!(cin >> var)){
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    throw runtime_error("Invalid Input");
+                }
+            }
+            break;
+        }
+        catch (runtime_error& e){
+            cerr << e.what() << endl;
+        }
+    }
+    return var;
+}
+
+void pressEnterToContinue(){
+    cout << "Press Enter to continue: ";
+    while(true){
+        if(_kbhit()){ // check whether key is press or not
+            char key = _getch(); // get the key without input
+            if(key == '\r'){
+                break;
+            }
+        }
+    }
 }
