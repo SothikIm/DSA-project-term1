@@ -39,6 +39,13 @@ public:
         if(mysql_query(con, query.c_str()))
             throw runtime_error(mysql_error(con));
     }
+
+    my_ulonglong insert(const string& query){
+        if(mysql_query(con, query.c_str()))
+            throw runtime_error(mysql_error(con));
+        return mysql_insert_id(con);
+    }
+
     template <typename T>
     LinkList<T> runQuery(const string& query){
         if(mysql_query(con, query.c_str()))

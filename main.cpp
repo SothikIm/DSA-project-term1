@@ -44,17 +44,31 @@ int main() {
                 env["PASSWORD"].c_str(),
                 env["DB"].c_str(),
                 stoi(env["PORT"]));
+    Booking b(db);
     int choice;
+    Reservation res;
     do{
         displayMenu();
         choice = inputVariable<int>("Enter your choice: ");
         switch(choice){
         case 1:{
-            Booking b(db);
             b.display();
+            cin >> res;
+            b.addBooking(res);
             pressEnterToContinue();
             clearScreen();
             break;
+        }
+        case 2:{
+            b.display();
+            int reservationId = inputVariable<int>("Enter your reservation ID.");
+            b.cancelBooking(reservationId);
+            pressEnterToContinue();
+            clearScreen();
+            break;
+        }
+        case 3:{
+
         }
         default:
             cout << "Invalid input.\n";

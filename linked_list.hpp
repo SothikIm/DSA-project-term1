@@ -209,7 +209,7 @@ public:
                             tail = prev;
                         prev->next = cur->next;
                         delete cur;
-                        cout << "Delete successfully" << endl;
+//                        cout << "Delete successfully" << endl;
                         found = true;
                         size--;
                         break;

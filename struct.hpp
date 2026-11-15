@@ -9,6 +9,8 @@
 #include <cstdlib>
 #include <sstream>
 using namespace std;
+
+
 struct Student{
     int id;
     string fName;
@@ -127,6 +129,12 @@ struct DateTime {
         return os;
     }
 
+    friend istream& operator>>(istream& is, DateTime& dt){
+        cout << "Enter Year Month Day Hour Minute Second: ";
+        is >> dt.year >> dt.month >> dt.day >> dt.hour >> dt.minute >> dt.second;
+        return is;
+    }
+
     string toMysqlString() const {
         ostringstream oss;
         oss << setfill('0')
@@ -148,6 +156,7 @@ struct Reservation {
     DateTime createAt;
     string roomCode;
     int studentId;
+    string procedure;
 
     Reservation() {}
     Reservation(MYSQL_ROW row){
@@ -158,6 +167,7 @@ struct Reservation {
         createAt = row[4] ? row[4] : "";
         roomCode = row[5] ? row[5] : "";
         studentId = row[6] ? stoi(row[6]) : 0;
+        procedure = row[7] ? row[7] : "Created";
     }
 
     bool isWorkingHour(){
@@ -169,8 +179,26 @@ struct Reservation {
     friend ostream& operator<<(ostream& os, const Reservation& res){
         os << "{ " << res.id << ", " << res.startTime << ", " << res.endTime
            << ", " << res.purpose << ", " << res.createAt << ", " << res.roomCode
-           << ", " << res.studentId << "}\n";
+           << ", " << res.studentId << ", " << res.procedure << "}\n";
         return os;
+    }
+
+    friend istream& operator>>(istream& is, Reservation& res){
+        cout << "Enter start time: ";
+        is >> res.startTime;
+        cout << "Enter end time: ";
+        is >> res.endTime;
+        cout << "Enter purpose: ";
+        getline(is >> ws, res.purpose);
+        cout << "Enter room code or name: ";
+        is >> res.roomCode;
+        cout << "Enter your id: ";
+        is >> res.studentId;
+        return is;
+    }
+
+    bool operator==(const Reservation& other){
+        return this->id == other.id;
     }
 };
 
