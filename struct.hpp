@@ -10,6 +10,9 @@
 #include <sstream>
 using namespace std;
 
+enum ProcedureStatus {
+    Created  = 1, CheckIn, CheckOut, Cancel, Delay
+};
 
 struct Student{
     int id;

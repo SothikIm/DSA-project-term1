@@ -45,7 +45,7 @@ public:
                     p.*,
                     ROW_NUMBER() OVER (
                         PARTITION BY p.reservation_id
-                        ORDER BY p.procedure_time DESC
+                        ORDER BY p.procedure_time DESC, p.procedure_status_id DESC
                     ) AS rn
                 FROM `Procedure` p
             )
@@ -79,23 +79,53 @@ public:
         existBooking.pushBack(newBooking);
     }
 
-    void cancelBooking(int& bookingId){
-        for(auto itr = existBooking.begin(); itr != existBooking.end(); ++itr){
-            if(bookingId == itr->id){
-                cout << *itr;
-                char ans;
-                cout << "Are your sure you want to booking this?(Y or N): ";
-                cin >> ans;
-                if(tolower(ans) == 'y'){
-                    string sql = "DELETE FROM Reservation WHERE reservation_id = " + to_string(bookingId) + ";";
-                    db.execute(sql);
-                    existBooking.pop(*itr);
-                    cout << "Cancel successfully.\n";
+    void updateBookingStatus(int bookingId, ProcedureStatus newStatus) {
+        int statusId = static_cast<int>(newStatus);
+        string newStatusName;
+
+        switch (newStatus) {
+            case ProcedureStatus::CheckIn:  newStatusName = "Check in";  break;
+            case ProcedureStatus::CheckOut: newStatusName = "Check out"; break;
+            case ProcedureStatus::Cancel:   newStatusName = "Cancel";    break;
+            case ProcedureStatus::Delay:    newStatusName = "Delay";     break;
+            default:
+                throw invalid_argument("Invalid status code.");
+        }
+
+        for (auto itr = existBooking.begin(); itr != existBooking.end(); ++itr) {
+            if (bookingId == itr->id) {
+                // 1. Reject if already in the target status
+                if (itr->procedure == newStatusName) {
+                    throw runtime_error("Reservation is already " + itr->procedure + ".");
                 }
+
+                // 2. Reject if already finalized (Cancel or Check out)
+                if (itr->procedure == "Cancel" || itr->procedure == "Check out") {
+                    throw runtime_error("Cannot update: Reservation is already finalized (" + itr->procedure + ").");
+                }
+
+                // 3. Validate state transitions
+                if (newStatus == ProcedureStatus::CheckOut) {
+                    if (itr->procedure != "Check in") {
+                        throw runtime_error("Cannot Check out: Reservation must be checked in first (Current status: " + itr->procedure + ").");
+                    }
+                } else {
+                    // For Check in (2), Cancel (4), and Delay (5): must be Created or Delay
+                    if (itr->procedure != "Created" && itr->procedure != "Delay") {
+                        throw runtime_error("Cannot change to " + newStatusName + " from current status: " + itr->procedure + ".");
+                    }
+                }
+
+                // 4. Insert new status log into MariaDB and update local cache
+                string sql = "INSERT INTO `Procedure` (reservation_id, procedure_status_id) VALUES (" +
+                             to_string(itr->id) + ", " + to_string(statusId) + ");";
+                db.execute(sql);
+                itr->procedure = newStatusName;
                 return;
             }
         }
-        throw runtime_error("Reservation not found.\n");
+
+        throw runtime_error("Reservation not found.");
     }
 
     void display(){

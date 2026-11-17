@@ -22,7 +22,7 @@ void displayMenu(){
     cout << "2. Cancel reservation.\n";
     cout << "3. Check in.\n";
     cout << "4. Check out.\n";
-    cout << "5. Search Room.\n";
+    cout << "5. Delay booking.\n";
     cout << "6. List top active rooms.\n";
     cout << "7. Exit.\n";
 }
@@ -54,7 +54,13 @@ int main() {
         case 1:{
             b.display();
             cin >> res;
-            b.addBooking(res);
+            try{
+                b.addBooking(res);
+                cout << "Add booking successfully.\n";
+            }
+            catch(const runtime_error& e){
+                cerr << e.what() << endl;
+            }
             pressEnterToContinue();
             clearScreen();
             break;
@@ -62,13 +68,58 @@ int main() {
         case 2:{
             b.display();
             int reservationId = inputVariable<int>("Enter your reservation ID.");
-            b.cancelBooking(reservationId);
+            try{
+                b.updateBookingStatus(reservationId, ProcedureStatus::Cancel);
+                cout << "Cancel successfully.\n";
+            }
+            catch(const runtime_error& err){
+                cerr << err.what() << endl;
+            }
             pressEnterToContinue();
             clearScreen();
             break;
         }
         case 3:{
-
+            b.display();
+            int reservationId = inputVariable<int>("Enter your reservation ID.");
+            try{
+                b.updateBookingStatus(reservationId, ProcedureStatus::CheckIn);
+                cout << "Check in successfully.\n";
+            }
+            catch(const runtime_error& err){
+                cerr << err.what() << endl;
+            }
+            pressEnterToContinue();
+            clearScreen();
+            break;
+        }
+        case 4:{
+            b.display();
+            int reservationId = inputVariable<int>("Enter your reservation ID.");
+            try{
+                b.updateBookingStatus(reservationId, ProcedureStatus::CheckOut);
+                cout << "Check out successfully.\n";
+            }
+            catch(const runtime_error& err){
+                cerr << err.what() << endl;
+            }
+            pressEnterToContinue();
+            clearScreen();
+            break;
+        }
+        case 5:{
+            b.display();
+            int reservationId = inputVariable<int>("Enter your reservation ID.");
+            try{
+                b.updateBookingStatus(reservationId, ProcedureStatus::Delay);
+                cout << "Delay successfully.\n";
+            }
+            catch(const runtime_error& err){
+                cerr << err.what() << endl;
+            }
+            pressEnterToContinue();
+            clearScreen();
+            break;
         }
         default:
             cout << "Invalid input.\n";
