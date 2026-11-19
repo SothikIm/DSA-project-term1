@@ -72,6 +72,7 @@ public:
                         newBooking.roomCode + "', " +
                         to_string(newBooking.studentId) + ");";
         newBooking.id = db.insert(sql);
+        newBooking.createAt = DateTime::now();
         sql = "INSERT INTO `Procedure` (procedure_time, reservation_id, procedure_status_id) VALUES"
                 "(NOW(), LAST_INSERT_ID(), 1);";
         db.insert(sql);
@@ -87,7 +88,7 @@ public:
             case ProcedureStatus::CheckIn:  newStatusName = "Check in";  break;
             case ProcedureStatus::CheckOut: newStatusName = "Check out"; break;
             case ProcedureStatus::Cancel:   newStatusName = "Cancel";    break;
-            case ProcedureStatus::Delay:    newStatusName = "Delay";     break;
+            case ProcedureStatus::Delay:    throw runtime_error("This function doesn't work with Delay.\n"); break;
             default:
                 throw invalid_argument("Invalid status code.");
         }
@@ -110,7 +111,7 @@ public:
                         throw runtime_error("Cannot Check out: Reservation must be checked in first (Current status: " + itr->procedure + ").");
                     }
                 } else {
-                    // For Check in (2), Cancel (4), and Delay (5): must be Created or Delay
+                    // For Check in (2), Cancel (4): must be Created or Delay
                     if (itr->procedure != "Created" && itr->procedure != "Delay") {
                         throw runtime_error("Cannot change to " + newStatusName + " from current status: " + itr->procedure + ".");
                     }
@@ -123,9 +124,40 @@ public:
                 itr->procedure = newStatusName;
                 return;
             }
+            throw runtime_error("Reservation not found.\n");
         }
+    }
 
+    void delayBooking(int bookingId, const DateTime& newStartTime, const DateTime& newEndTime){
+        for(auto itr = existBooking.begin(); itr != existBooking.end(); ++itr){
+            if(bookingId == itr->id){
+                if(itr->procedure != "Created" && itr->procedure != "Delay"){
+                    throw runtime_error("Cannot delay: Reservation is currently:" + itr->procedure + ".");
+                }
+                Reservation updated = *itr;
+                updated.startTime = newStartTime;
+                updated.endTime = newEndTime;
+                if(hasConflictRoom(updated))
+                    throw runtime_error("Conflict detected! Room is not available at the new time.");
+                string updateSql = "UPDATE Reservation SET start_time = '" + newStartTime.toMysqlString() +
+                                    "', end_time = '" + newEndTime.toMysqlString() +
+                                    "' WHERE reservation_id = " + to_string(bookingId) + ";";
+                db.execute(updateSql);
+                string proSql = "INSERT INTO `Procedure` (reservation_id, procedure_status_id) VALUES (" + to_string(bookingId) + ", 5);";
+                db.execute(proSql);
+                itr->startTime = newStartTime;
+                itr->endTime = newEndTime;
+                itr->procedure = "Delay";
+                return;
+             }
+        }
         throw runtime_error("Reservation not found.");
+    }
+
+    LinkList<string> viewPopulaorRoom(int numberOfRoom = 5){
+        string query = "SELECT r.room_code FROM Room r JOIN Reservation res ON r.room_code = res.room_code GROUP BY res.room_code LIMIT " + to_string(numberOfRoom);
+        LinkList<string> result = db.runQuery<string>(query);
+        return result;
     }
 
     void display(){

@@ -10,6 +10,7 @@
 #include "load_env.hpp"
 #include "linked_list.hpp"
 #include "struct.hpp"
+#include<type_traits>
 using namespace std;
 
 
@@ -59,8 +60,14 @@ public:
         }
         LinkList<T> result;
         MYSQL_ROW row;
+        int size = mysql_num_fields(res);
         while((row = mysql_fetch_row(res))){
-            result.pushBack(T(row));
+            if constexpr(is_same_v<T, string>){
+                for(int i = 0; i < size; i++){
+                    result.pushBack(row[i] ? string(row[i]) : "");
+                }
+            }else
+                result.pushBack(T(row));
         }
         mysql_free_result(res);
         return result;

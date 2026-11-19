@@ -11,6 +11,7 @@
 #include "struct.hpp"
 #include "database.hpp"
 #include "booking.hpp"
+#include "login.hpp"
 using namespace std;
 
 template <typename T>
@@ -44,6 +45,8 @@ int main() {
                 env["PASSWORD"].c_str(),
                 env["DB"].c_str(),
                 stoi(env["PORT"]));
+    LoginAccount acc(db);
+    acc.displayAllAccount();
     Booking b(db);
     int choice;
     Reservation res;
@@ -81,7 +84,7 @@ int main() {
         }
         case 3:{
             b.display();
-            int reservationId = inputVariable<int>("Enter your reservation ID.");
+            int reservationId = inputVariable<int>("Enter your reservation ID: ");
             try{
                 b.updateBookingStatus(reservationId, ProcedureStatus::CheckIn);
                 cout << "Check in successfully.\n";
@@ -95,7 +98,7 @@ int main() {
         }
         case 4:{
             b.display();
-            int reservationId = inputVariable<int>("Enter your reservation ID.");
+            int reservationId = inputVariable<int>("Enter your reservation ID: ");
             try{
                 b.updateBookingStatus(reservationId, ProcedureStatus::CheckOut);
                 cout << "Check out successfully.\n";
@@ -109,9 +112,11 @@ int main() {
         }
         case 5:{
             b.display();
-            int reservationId = inputVariable<int>("Enter your reservation ID.");
+            int reservationId = inputVariable<int>("Enter your reservation ID: ");
+            DateTime newStartTime = inputVariable<DateTime>("Enter new start time: ");
+            DateTime newEndTime = inputVariable<DateTime>("Enter new end time: ");
             try{
-                b.updateBookingStatus(reservationId, ProcedureStatus::Delay);
+                b.delayBooking(reservationId, newStartTime, newEndTime);
                 cout << "Delay successfully.\n";
             }
             catch(const runtime_error& err){
@@ -121,11 +126,20 @@ int main() {
             clearScreen();
             break;
         }
+        case 6:{
+            int numberOfRoom = inputVariable<int>("Enter number of rooms you want to views (only 70 rooms in the school): ");
+            LinkList<string> popularRoom = b.viewPopulaorRoom(numberOfRoom);
+            popularRoom.display();
+            break;
+        }
+        case 7:{
+            cout << "System Exit.\n";
+        }
         default:
             cout << "Invalid input.\n";
             break;
         }
-    }while(choice != 7);
+    }while(choice != 8);
 
 
     return 0;

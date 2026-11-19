@@ -8,33 +8,29 @@
 #include <mariadb/mysql.h>
 #include <cstdlib>
 #include <sstream>
+#include <ctime>
 using namespace std;
 
 enum ProcedureStatus {
     Created  = 1, CheckIn, CheckOut, Cancel, Delay
 };
 
-struct Student{
-    int id;
-    string fName;
-    string lName;
+struct Account{
+    string name;
     string email;
-    string degree;
+    string password;
 
-    Student(int id, string fName, string lName, string email, string degree):
-        id(id), fName(fName), lName(lName), email(email), degree(degree) {}
-    Student() {}
+    Account(string name, string email, string password):
+        name(name), email(email), password(password) {}
+    Account() {}
 
-    Student(MYSQL_ROW row){
-        id = (row[0] ? stoi(row[0]) : 0);
-        fName = (row[1] ? row[1] : "");
-        lName = (row[2] ? row[2] : "");
-        email = (row[3] ? row[3] : "");
-        degree = (row[4] ? row[4] : "");
+    Account(MYSQL_ROW row){
+        name = row[0] ? string(row[0]) : "";
+        email = row[1] ? string(row[1]) : "";
+        password = row[2] ? string(row[2]) : "";
     }
-    friend ostream& operator<<(ostream& os, const Student& s) {
-        os << "{" << s.id << ", " << s.fName << " " << s.lName
-           << ", " << s.email << ", " << s.degree << "}";
+    friend ostream& operator<<(ostream& os, const Account& acc) {
+        os << "{" << acc.name << ", " << acc.email << "}";
         return os;
     }
 };
@@ -75,6 +71,15 @@ struct DateTime {
         stringstream ss(str);
         ss >> year >> dash1 >> month >> dash2 >> day
            >> hour >> colon1 >> minute >> colon2 >> second;
+    }
+
+    DateTime (int year, int month, int day, int hour, int min, int sec) {
+        this->year = year;
+        this->month = month;
+        this->day = day;
+        this->hour = hour;
+        this->minute = min;
+        this->second = sec;
     }
 
     DateTime operator=(const char* str){
@@ -149,6 +154,19 @@ struct DateTime {
             << setw(2) << second;
         return oss.str();
     }
+
+    static DateTime now() {
+    time_t t = time(nullptr);
+    tm* lt = localtime(&t);
+    return DateTime(
+        lt->tm_year + 1900,
+        lt->tm_mon + 1,
+        lt->tm_mday,
+        lt->tm_hour,
+        lt->tm_min,
+        lt->tm_sec
+    );
+}
 };
 
 struct Reservation {
