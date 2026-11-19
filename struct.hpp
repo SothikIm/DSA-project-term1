@@ -16,21 +16,23 @@ enum ProcedureStatus {
 };
 
 struct Account{
+    int studentId;
     string name;
     string email;
     string password;
 
-    Account(string name, string email, string password):
-        name(name), email(email), password(password) {}
+    Account(int id, string name, string email, string password):
+        studentId(id), name(name), email(email), password(password) {}
     Account() {}
 
     Account(MYSQL_ROW row){
-        name = row[0] ? string(row[0]) : "";
-        email = row[1] ? string(row[1]) : "";
-        password = row[2] ? string(row[2]) : "";
+        studentId = row[0] ? stoi(row[0]) : 0;
+        name = row[1] ? string(row[1]) : "";
+        email = row[2] ? string(row[2]) : "";
+        password = row[3] ? string(row[3]) : "";
     }
     friend ostream& operator<<(ostream& os, const Account& acc) {
-        os << "{" << acc.name << ", " << acc.email << "}";
+        os << "{" << acc.studentId << " " << acc.name << ", " << acc.email << "}";
         return os;
     }
 };

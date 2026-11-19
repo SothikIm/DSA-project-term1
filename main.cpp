@@ -6,6 +6,7 @@
 #include<map>
 #include<vector>
 #include<string>
+#include<cctype>
 #include "load_env.hpp"
 #include "linked_list.hpp"
 #include "struct.hpp"
@@ -17,6 +18,7 @@ using namespace std;
 template <typename T>
 T inputVariable(const string messages);
 void pressEnterToContinue();
+bool loginOrSignupAccount(LoginAccount& acc);
 
 void displayMenu(){
     cout << "1. Booking room.\n";
@@ -46,7 +48,28 @@ int main() {
                 env["DB"].c_str(),
                 stoi(env["PORT"]));
     LoginAccount acc(db);
-    acc.displayAllAccount();
+    cout << "Login account \n";
+    string email = inputVariable<string>("Enter your email: ");
+    string password = inputVariable<string>("Enter your password: ");
+    try{
+        while(!acc.login(email, password)){
+            cout << "Email or password incorrect.\n";
+            char loginAgain = inputVariable<char>("Enter your choice: (login again: y or exit system: n): ");
+            if(tolower(loginAgain) == 'y'){
+                email = inputVariable<string>("Enter your email again: ");
+                password = inputVariable<string>("Enter your password again: ");
+            }else{
+                throw runtime_error("Cannot connect to the account.\n");
+            }
+        }
+    }
+    catch(runtime_error& e){
+        cerr << e.what() << endl;
+        return -1;
+    }
+    cout << "Account login successfully.\n";
+    pressEnterToContinue();
+    clearScreen();
     Booking b(db);
     int choice;
     Reservation res;
@@ -134,12 +157,13 @@ int main() {
         }
         case 7:{
             cout << "System Exit.\n";
+            break;
         }
         default:
             cout << "Invalid input.\n";
             break;
         }
-    }while(choice != 8);
+    }while(choice != 7);
 
 
     return 0;
