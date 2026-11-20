@@ -5,8 +5,6 @@
 #include <iostream>
 #include <mariadb/mysql.h>
 #include <cstdlib>
-#include<map>
-#include<vector>
 #include "load_env.hpp"
 #include "linked_list.hpp"
 #include "struct.hpp"

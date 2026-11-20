@@ -3,8 +3,6 @@
 #include <mariadb/mysql.h>
 #include <cstdlib>
 #include <conio.h>
-#include<map>
-#include<vector>
 #include<string>
 #include<cctype>
 #include "load_env.hpp"

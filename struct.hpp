@@ -2,7 +2,6 @@
 #define STRUCT_HPP_INCLUDED
 #include <iostream>
 #include <string>
-#include <vector>
 #include <iomanip>
 #include <tuple>
 #include <mariadb/mysql.h>
