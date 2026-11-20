@@ -27,7 +27,6 @@ void displayMenu(){
     cout << "6. List top active rooms.\n";
     cout << "7. Exit.\n";
 }
-
 void clearScreen(){
     #ifdef _WIN32
         system("cls");

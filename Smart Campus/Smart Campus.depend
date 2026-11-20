@@ -1,8 +1,0 @@
-# depslib dependency file v1.0
-1795137751 source:c:\users\user\onedrive - cambodia academy of digital technology\datastructure&algo(cpp)\term1-project\dsa-project-term1\smart campus\main.cpp
-	<raygui.h>
-	<raylib.h>
-	<cstring>
-	<string>
-	<iostream>
-
