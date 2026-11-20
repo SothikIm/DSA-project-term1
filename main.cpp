@@ -16,7 +16,6 @@ using namespace std;
 template <typename T>
 T inputVariable(const string messages);
 void pressEnterToContinue();
-bool loginOrSignupAccount(LoginAccount& acc);
 
 void displayMenu(){
     cout << "1. Booking room.\n";
@@ -174,7 +173,7 @@ T inputVariable(const string messages){
     {
         try{
             cout << messages;
-            // constexpr means “this can be evaluated at compile time.
+            // constexpr means ï¿½this can be evaluated at compile time.
             if constexpr (is_same_v<T, string>){
                 // ws mean remove whitespace in input buffer
                 getline(cin >> ws, var);
