@@ -147,7 +147,7 @@ AppScreen UpdateAndDrawLoginScreen(Font customFont, UserSession &outUser)
 
 
 
-int main(void){
+int main(){
     const int screenWidth = 1000;
     const int screenHeight = 1000;
 
