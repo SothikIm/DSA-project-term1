@@ -3,6 +3,6 @@
 *.o
 obj
 bin
-SmartCampus.cbp
+SmartCampus.layout
 .env
 SmartCampus.depend
