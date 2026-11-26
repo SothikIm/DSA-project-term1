@@ -64,6 +64,7 @@
 			<Option target="GUI" />
 			<Option target="Release" />
 		</Unit>
+		<Unit filename="room.hpp" />
 		<Unit filename="struct.hpp" />
 		<Extensions />
 	</Project>

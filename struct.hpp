@@ -227,20 +227,15 @@ struct Reservation {
 struct Room{
     string roomCode;
     int capacity;
-    string roomType;
-    string buildingName;
 
     Room() {}
     Room(MYSQL_ROW row){
         roomCode = row[0] ? row[0] : "Unknown";
         capacity = row[1] ? stoi(row[1]) : 0;
-        roomType = row[2] ? row[2] : "Unknown";
-        buildingName = row[3] ? row[3] : "Unknown";
     }
 
     friend ostream& operator<<(ostream& os, const Room& r){
-        os << "{ " << r.roomCode << ", " << r.capacity
-            << ", " << r.roomType << ", " << r.buildingName << "}\n";
+        os << "{ " << r.roomCode << ", " << r.capacity << "}\n";
         return os;
     }
 };

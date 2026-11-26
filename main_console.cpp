@@ -11,6 +11,7 @@
 #include "database.hpp"
 #include "booking.hpp"
 #include "login.hpp"
+#include"room.hpp"
 using namespace std;
 
 template <typename T>
@@ -68,6 +69,8 @@ int main() {
     pressEnterToContinue();
     clearScreen();
     Booking b(db);
+    RoomList r(db);
+    r.displayAllRoom();
     int choice;
     Reservation res;
     do{
